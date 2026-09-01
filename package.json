@@ -1,0 +1,35 @@
+{
+  "name": "@acr-js/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript & JavaScript client SDK for Agentic Chat Rooms (ACR) Protocol",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/test/client.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "acr",
+    "sdk",
+    "typescript",
+    "agentic-chat-rooms",
+    "mcp",
+    "autonomous-agents",
+    "consensus",
+    "zero-trust"
+  ],
+  "author": "@acr-js",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.5"
+  }
+}
