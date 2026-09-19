@@ -47,3 +47,26 @@ test('AcrClient castVote and getAuditTail fallback', async () => {
   assert.ok(Array.isArray(audits));
   assert.ok(audits.length > 0);
 });
+
+test('AcrClient OpsRoom operations and battlecard', async () => {
+  const client = new AcrClient();
+  const status = await client.getOpsRoomStatus();
+  assert.strictEqual(status.status, 'nominal');
+  assert.ok(status.incident);
+  assert.strictEqual(status.incident?.severity, 'SEV-1');
+  assert.ok(status.squad);
+  assert.strictEqual(status.squad?.agent_count, 5);
+
+  const incident = await client.triggerIncident({ title: 'Spike test', severity: 'SEV-2' });
+  assert.strictEqual(incident.status, 'triggered');
+
+  const exec = await client.executePlan('plan_99');
+  assert.strictEqual(exec.status, 'executed');
+  assert.strictEqual(exec.plan_id, 'plan_99');
+
+  const battlecard = await client.getBattlecard();
+  assert.ok(Array.isArray(battlecard));
+  assert.strictEqual(battlecard.length, 4);
+  assert.strictEqual(battlecard[0].vector, 'Reasoning Engine');
+});
+

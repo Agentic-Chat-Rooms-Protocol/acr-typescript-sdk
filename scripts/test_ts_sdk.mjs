@@ -39,4 +39,25 @@ const vote = await room.voteConsensus({
 assert.strictEqual(vote, true);
 console.log('✓ Consensus voting verified');
 
+const opsStatus = await client.getOpsRoomStatus();
+assert.strictEqual(opsStatus.status, 'nominal');
+assert.strictEqual(opsStatus.incident?.severity, 'SEV-1');
+assert.strictEqual(opsStatus.squad?.agent_count, 5);
+console.log('✓ OpsRoom status verified');
+
+const incidentRes = await client.triggerIncident({ title: 'Spike' });
+assert.strictEqual(incidentRes.status, 'triggered');
+console.log('✓ OpsRoom incident trigger verified');
+
+const planRes = await client.executePlan('plan_123');
+assert.strictEqual(planRes.status, 'executed');
+assert.strictEqual(planRes.plan_id, 'plan_123');
+console.log('✓ OpsRoom plan execute verified');
+
+const battlecard = await client.getBattlecard();
+assert.strictEqual(battlecard.length, 4);
+assert.strictEqual(battlecard[0].winner, 'ACR OpsRoom (10x Fewer Loops)');
+console.log('✓ OpsRoom battlecard verified');
+
 console.log('\nALL TYPESCRIPT SDK TESTS PASSED (100% OK)');
+

@@ -6,5 +6,8 @@ export type {
   Proposal,
   ConsensusVotePayload,
   AuditEntry,
-  MessageListener
+  MessageListener,
+  OpsRoomStatus,
+  OpsBattlecardEntry
 } from './types.js';
+

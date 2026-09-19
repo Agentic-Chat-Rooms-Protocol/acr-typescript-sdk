@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node --test dist/test/client.test.js",
+    "test": "node scripts/test_ts_sdk.mjs",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

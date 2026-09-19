@@ -53,4 +53,36 @@ export interface AuditEntry {
     timestamp: string;
 }
 export type MessageListener = (msg: Message) => void;
+export interface OpsRoomStatus {
+    status: string;
+    incident?: {
+        id: string;
+        title: string;
+        severity: string;
+        status: string;
+        quorum_percentage: number;
+        threshold: number;
+    };
+    squad?: {
+        id: string;
+        name: string;
+        agent_count: number;
+        roles: string[];
+    };
+    sandbox?: {
+        engine: string;
+        egress_policy: string;
+        dry_run_passed: boolean;
+    };
+    ledger?: {
+        merkle_root: string;
+        audit_depth: number;
+    };
+}
+export interface OpsBattlecardEntry {
+    vector: string;
+    agentforce: string;
+    opsroom: string;
+    winner: string;
+}
 //# sourceMappingURL=types.d.ts.map

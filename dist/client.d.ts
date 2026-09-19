@@ -1,4 +1,4 @@
-import type { AcrClientConfig, Room, Message, ConsensusVotePayload, AuditEntry, MessageListener } from './types.js';
+import type { AcrClientConfig, Room, Message, ConsensusVotePayload, AuditEntry, MessageListener, OpsRoomStatus, OpsBattlecardEntry } from './types.js';
 export declare class AcrRoomHandle {
     private client;
     readonly roomId: string;
@@ -44,5 +44,13 @@ export declare class AcrClient {
     listMessages(roomId: string, limit?: number): Promise<Message[]>;
     castVote(vote: ConsensusVotePayload): Promise<boolean>;
     getAuditTail(limit?: number): Promise<AuditEntry[]>;
+    getOpsRoomStatus(): Promise<OpsRoomStatus>;
+    triggerIncident(payload?: {
+        title?: string;
+        severity?: string;
+        targetService?: string;
+    }): Promise<any>;
+    executePlan(planId: string): Promise<any>;
+    getBattlecard(): Promise<OpsBattlecardEntry[]>;
 }
 //# sourceMappingURL=client.d.ts.map
