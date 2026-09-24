@@ -39,11 +39,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
-      - name: Configure User npm Registry Auth & Verify
+      - name: Configure User npm Registry Auth
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
-          echo "Verifying npm credentials via whoami:"
-          npm whoami --registry https://registry.npmjs.org/
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
@@ -57,7 +55,7 @@ jobs:
         run: npm test
 
       - name: Publish Package to npmjs
-        run: npm publish --access public --provenance
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
