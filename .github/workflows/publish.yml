@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Check Authentication Token Presence
         run: |
@@ -39,9 +38,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
-      - name: Configure User npm Registry Auth
+      - name: Configure npm Registry Auth
         run: |
-          npm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 

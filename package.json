@@ -1,6 +1,6 @@
 {
   "name": "@acr-js/sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Official TypeScript & JavaScript client SDK for Agentic Chat Rooms (ACR) Protocol",
   "type": "module",
   "main": "dist/index.js",
