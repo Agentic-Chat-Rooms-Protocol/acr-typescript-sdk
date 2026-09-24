@@ -26,6 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Check Authentication Token Presence
         run: |
@@ -35,13 +36,6 @@ jobs:
             echo "::error::NPM authentication token is EMPTY or NOT AVAILABLE in this repository context"
             exit 1
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
-
-      - name: Configure npm Registry Auth
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
@@ -55,7 +49,7 @@ jobs:
         run: npm test
 
       - name: Publish Package to npmjs
-        run: npm publish --access public --userconfig ~/.npmrc
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
