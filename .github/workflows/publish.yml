@@ -1,4 +1,4 @@
-name: Publish Package to npm
+name: Publish Package to npmjs
 
 on:
   release:
@@ -8,14 +8,16 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  build-and-publish:
+  publish:
     name: Build & Publish @acr-js/sdk
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
+    env:
+      NPM_REGISTRY_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -23,9 +25,23 @@ jobs:
       - name: Setup Node.js Runtime
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@acr-js'
+          node-version: '22'
+
+      - name: Check Authentication Token Presence
+        run: |
+          if [ -n "$NPM_REGISTRY_TOKEN" ]; then
+            echo "NPM authentication token is present in runner environment (length: ${#NPM_REGISTRY_TOKEN} chars)"
+          else
+            echo "::error::NPM authentication token is EMPTY or NOT AVAILABLE in this repository context"
+          fi
+
+      - name: Configure npm registry auth
+        run: |
+          cat > .npmrc <<'EOF'
+          //registry.npmjs.org/:_authToken=${NPM_REGISTRY_TOKEN}
+          registry=https://registry.npmjs.org/
+          always-auth=true
+          EOF
 
       - name: Install Dependencies
         run: npm ci || npm install
@@ -36,7 +52,6 @@ jobs:
       - name: Run Test Verification
         run: npm test
 
-      - name: Publish Package to npm Registry
+      - name: Publish Package to npmjs
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
+
