@@ -28,6 +28,14 @@
   ],
   "author": "@acr-js",
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Agentic-Chat-Rooms-Protocol/acr-typescript-sdk.git"
+  },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.4.5"
