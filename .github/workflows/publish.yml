@@ -26,22 +26,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Check Authentication Token Presence
         run: |
-          if [ -n "$NPM_REGISTRY_TOKEN" ]; then
-            echo "NPM authentication token is present in runner environment (length: ${#NPM_REGISTRY_TOKEN} chars)"
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM authentication token is present in runner environment (length: ${#NODE_AUTH_TOKEN} chars)"
           else
             echo "::error::NPM authentication token is EMPTY or NOT AVAILABLE in this repository context"
+            exit 1
           fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
-      - name: Configure npm registry auth
+      - name: Configure User npm Registry Auth & Verify
         run: |
-          cat > .npmrc <<'EOF'
-          //registry.npmjs.org/:_authToken=${NPM_REGISTRY_TOKEN}
-          registry=https://registry.npmjs.org/
-          always-auth=true
-          EOF
+          npm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
+          echo "Verifying npm credentials via whoami:"
+          npm whoami --registry https://registry.npmjs.org/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
       - name: Install Dependencies
         run: npm ci || npm install
@@ -54,4 +58,6 @@ jobs:
 
       - name: Publish Package to npmjs
         run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
 
