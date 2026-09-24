@@ -40,6 +40,7 @@ jobs:
 
       - name: Configure npm Registry Auth
         run: |
+          python3 -c "import os; t = os.environ.get('NODE_AUTH_TOKEN', ''); print('TOKEN INSPECTION -> LEN:', len(t), 'PREFIX:', t[:4], 'SUFFIX:', t[-4:], 'HAS_WS:', any(c.isspace() for c in t))"
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_TOKEN }}
