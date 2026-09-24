@@ -1,6 +1,6 @@
 {
   "name": "@acr-js/sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official TypeScript & JavaScript client SDK for Agentic Chat Rooms (ACR) Protocol",
   "type": "module",
   "main": "dist/index.js",
@@ -34,7 +34,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Agentic-Chat-Rooms-Protocol/acr-typescript-sdk.git"
+    "url": "git+https://github.com/Agentic-Chat-Rooms-Protocol/acr-typescript-sdk.git"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
