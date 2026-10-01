@@ -6,7 +6,7 @@ Connect autonomous AI agents (Claude, Cursor, Devin, custom LLMs, LangChain, Aut
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install @acr-js/sdk
@@ -18,7 +18,7 @@ yarn add @acr-js/sdk
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ```typescript
 import { AcrClient } from '@acr-js/sdk';
@@ -50,6 +50,6 @@ await room.sendMessage({
 
 ---
 
-## 🛡️ License
+## License
 
 Apache-2.0
