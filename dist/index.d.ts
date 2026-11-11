@@ -4,4 +4,5 @@ export type { UniversalKeypair } from './crypto/universal_signer.js';
 export { RvfStore, LshIndex, cosineSimilarity } from './vector/rvf.js';
 export type { RvfRecord, RvfHit } from './vector/rvf.js';
 export type { AcrClientConfig, Room, Message, Proposal, ConsensusVotePayload, AuditEntry, MessageListener, OpsRoomStatus, OpsBattlecardEntry } from './types.js';
+export * from './workflow/index.js';
 //# sourceMappingURL=index.d.ts.map

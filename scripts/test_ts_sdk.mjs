@@ -4,7 +4,24 @@ import {
   UniversalSigner,
   RvfStore,
   LshIndex,
-  cosineSimilarity
+  cosineSimilarity,
+  NodeStatus,
+  branchPathFromString,
+  createSubBranch,
+  commonPrefixOf,
+  DEFAULT_ROUTE,
+  OUTCOME_UNKNOWN_ROUTE,
+  START,
+  parseSdkEdgeItems,
+  detectUnconditionalCycles,
+  validateSdkGraph,
+  elevateExecutionAuthority,
+  resolveSdkPredecessorRefs,
+  extractSdkCheckpointManifest,
+  getActiveSdkEvents,
+  FINISH_TASK_TOOL_NAME,
+  EXIT_LOOP_TOOL_NAME,
+  TOOL_CALL_HMAC_METADATA_KEY
 } from '../dist/index.js';
 
 console.log('Testing AcrClient from dist/index.js...');
@@ -137,5 +154,93 @@ assert.strictEqual(lshHits.length, 2);
 assert.strictEqual(lshHits[0].id, 'v1');
 assert.strictEqual(lshHits[1].id, 'v2');
 console.log('[OK] LshIndex 64-hyperplane ANN recall and candidate re-ranking verified');
+
+// --- ADK 2.0 Graph Workflow Topology & Validation Tests ---
+console.log('\nTesting ADK 2.0 Graph Workflow Topology Builder...');
+assert.strictEqual(NodeStatus.RECONCILING, 7);
+assert.strictEqual(NodeStatus.OUTCOME_UNKNOWN, 8);
+assert.strictEqual(DEFAULT_ROUTE, '__DEFAULT__');
+assert.strictEqual(OUTCOME_UNKNOWN_ROUTE, '__OUTCOME_UNKNOWN__');
+
+const rootBranch = branchPathFromString('root');
+assert.deepStrictEqual(rootBranch.segments, ['root']);
+const childA = createSubBranch('root', { name: 'branchA', runId: '0' });
+const childB = createSubBranch('root', { name: 'branchB', runId: '0' });
+assert.strictEqual(commonPrefixOf([childA, childB]), 'root');
+console.log('[OK] BranchPath hierarchical fork/join commonPrefixOf verified');
+
+const parsedEdges = parseSdkEdgeItems([
+  [START, 'triage', 'plan'],
+  ['plan', { approved: 'deploy', revise: 'triage' }],
+]);
+assert.strictEqual(parsedEdges.length, 4);
+const leafNodes = validateSdkGraph(
+  [START, { name: 'triage' }, { name: 'plan' }, { name: 'deploy' }],
+  parsedEdges
+);
+assert.strictEqual(leafNodes.has('deploy'), true);
+
+assert.throws(
+  () =>
+    detectUnconditionalCycles(
+      parseSdkEdgeItems([[START, 'a', 'b', 'a']]),
+      new Set([START.name, 'a', 'b'])
+    ),
+  /Unconditional cycle detected/
+);
+assert.throws(
+  () =>
+    validateSdkGraph(
+      [START, { name: 'a' }, { name: 'b' }],
+      parseSdkEdgeItems([[START, 'a', 'b', 'a']])
+    ),
+  /Unconditional cycle detected/
+);
+console.log('[OK] SDK Graph Topology Parser & 3-Color DFS Unconditional Cycle Detector verified');
+
+assert.strictEqual(FINISH_TASK_TOOL_NAME, 'finish_task');
+assert.strictEqual(EXIT_LOOP_TOOL_NAME, 'exit_loop');
+assert.strictEqual(TOOL_CALL_HMAC_METADATA_KEY, '__adk_internal_fc_hmac');
+assert.strictEqual(elevateExecutionAuthority('NONE', 'QUORUM_ELEVATED'), 'QUORUM_ELEVATED');
+assert.strictEqual(elevateExecutionAuthority('QUORUM_ELEVATED', 'CONSENT_ELEVATED'), 'CONSENT_ELEVATED');
+
+const resolvedInstr = resolveSdkPredecessorRefs(
+  'Deploy <Plan.target from planner> with risk=<Plan.risk from planner>',
+  { planner: { target: 'eu-central-1', risk: 12 } }
+);
+assert.strictEqual(resolvedInstr, 'Deploy eu-central-1 with risk=12');
+
+const sampleEvents = [
+  {
+    id: 'ev-1',
+    timestamp: 1000,
+    nodeInfo: { path: 'wf.planner', runId: '1' },
+    output: { target: 'eu-central-1', risk: 12 },
+    executionAuthority: 'QUORUM_ELEVATED'
+  },
+  {
+    id: 'ev-2',
+    timestamp: 1000,
+    type: 'compacted_event',
+    startTime: 1000,
+    endTime: 1000,
+    compactedEventIds: ['ev-1'],
+    compactedContent: { role: 'model', parts: [{ text: 'summary' }] }
+  },
+  {
+    id: 'ev-3',
+    timestamp: 1000,
+    output: { final: true }
+  }
+];
+const manifest = extractSdkCheckpointManifest(sampleEvents, 'inv-sdk-1');
+assert.strictEqual(manifest.highestAuthority, 'QUORUM_ELEVATED');
+assert.deepStrictEqual(manifest.outputsByNode['planner'], { target: 'eu-central-1', risk: 12 });
+
+const activeSdkEvents = getActiveSdkEvents(sampleEvents);
+assert.strictEqual(activeSdkEvents.length, 2); // ev-2 (CompactedEvent) and ev-3 (same-ms uncompacted event preserved!)
+assert.strictEqual(activeSdkEvents[0].id, 'ev-2');
+assert.strictEqual(activeSdkEvents[1].id, 'ev-3');
+console.log('[OK] SDK Dynamic Workflow Compaction Manifest, Predecessor Resolution & Monotonic Authority Lattice verified');
 
 console.log('\nALL TYPESCRIPT SDK TESTS PASSED (100% OK)');
