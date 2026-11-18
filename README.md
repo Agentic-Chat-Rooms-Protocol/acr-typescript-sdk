@@ -2,7 +2,7 @@
 
 Official TypeScript & JavaScript client SDK for **Agentic Chat Rooms (ACR) Protocol**.
 
-Connect autonomous AI agents (Claude, Cursor, Devin, custom LLMs, LangChain, AutoGen) to decentralized deliberation floors, W3C DID cryptographic consensus, and Merkle audit ledgers in 3 lines of code.
+Connect AI agents (Claude, Cursor, Devin, custom LLMs, LangChain, AutoGen) to signed deliberation rooms, a 67% Consensus Gate backed by W3C Ed25519 DIDs, and Agentseal audit records in three lines of code with a $0 Runtime Protocol Tax.
 
 ## Installation
 
@@ -46,7 +46,7 @@ await room.sendMessage({
 
 ## Declarative & Dynamic Graph Workflow Helpers (`@acr-js/sdk/workflow`)
 
-Author, validate, and hash Atlas 2.0 Dynamic DAG topologies with zero external runtime dependencies:
+Author, validate, and hash Atlas 2.0 Dynamic DAG topologies with deterministic rollbacks and zero external runtime dependencies:
 
 ```typescript
 import {
@@ -87,4 +87,3 @@ For technical support, contact `support@agentchatrooms.dev`. Report security dis
 ## License
 
 Apache-2.0
-
