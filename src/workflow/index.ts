@@ -542,3 +542,37 @@ export function getActiveSdkEvents<T extends SdkEventLike>(
   return active;
 }
 
+// ---------------------------------------------------------------------------
+// Canonical 18-Workflow Catalog Alignment (ADK 2.0 / ACR Protocol)
+// ---------------------------------------------------------------------------
+
+export const CANONICAL_WORKFLOW_IDS = Object.freeze([
+  'postgres-split-brain',
+  'egress-token-anomaly',
+  'ingress-oom-autoscaling',
+  'canary-deployment-rollback',
+  'code-review-tla-verification',
+  'saif-compliance-audit',
+  'bft-consensus-deliberation',
+  'twinseal-passkey-approval',
+  'durable-wal-recovery',
+  'context-compaction-pruning',
+  'byzantine-fault-slashing',
+  'identity-key-rotation',
+  'micro-sandbox-isolation',
+  'cross-model-agentflex-synthesis',
+  'declarative-step-playbook',
+  'postguard-injection-defense',
+  'dynamic-dag-topology',
+  'transitive-trust-federation',
+] as const);
+
+export type CanonicalWorkflowId = (typeof CANONICAL_WORKFLOW_IDS)[number];
+
+const CANONICAL_WORKFLOW_ID_SET: ReadonlySet<string> = new Set(CANONICAL_WORKFLOW_IDS);
+
+export function isCanonicalWorkflowId(id: string): id is CanonicalWorkflowId {
+  return CANONICAL_WORKFLOW_ID_SET.has(id);
+}
+
+

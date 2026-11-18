@@ -1,3 +1,46 @@
+import { DEFAULT_LOCAL_URL, REST_TIMEOUT_MS, assertNoRedirectResponse, } from './mcpendpoint.js';
+function getNodeProcess() {
+    return globalThis.process;
+}
+/**
+ * Resolves the local daemon API Bearer token in priority order:
+ * 1. Explicit token / apiKey passed to AcrClient
+ * 2. ACR_API_TOKEN environment variable
+ * 3. ~/.acr/api-token file (Node.js runtime only)
+ */
+export async function loadDaemonApiToken(explicitToken) {
+    const direct = explicitToken?.trim();
+    if (direct) {
+        return direct;
+    }
+    const proc = getNodeProcess();
+    const envToken = proc?.env?.ACR_API_TOKEN?.trim();
+    if (envToken) {
+        return envToken;
+    }
+    if (proc?.versions?.node) {
+        try {
+            const fsMod = 'node:fs/promises';
+            const osMod = 'node:os';
+            const pathMod = 'node:path';
+            const [fs, os, path] = await Promise.all([
+                import(fsMod),
+                import(osMod),
+                import(pathMod),
+            ]);
+            const tokenPath = path.join(os.homedir(), '.acr', 'api-token');
+            const raw = await fs.readFile(tokenPath, 'utf8');
+            const trimmed = raw.trim();
+            if (trimmed) {
+                return trimmed;
+            }
+        }
+        catch {
+            // Missing or unreadable ~/.acr/api-token is valid when auth is disabled or unconfigured.
+        }
+    }
+    return undefined;
+}
 export class AcrRoomHandle {
     client;
     roomId;
@@ -44,13 +87,16 @@ export class AcrClient {
     agentName;
     apiKey;
     timeoutMs;
+    strict;
     activeRoomHandles = new Map();
     constructor(config = {}) {
-        this.baseUrl = (config.baseUrl || 'http://localhost:20443').replace(/\/+$/, '');
+        const envDaemonUrl = getNodeProcess()?.env?.ACR_DAEMON_URL?.trim();
+        this.baseUrl = (config.baseUrl || envDaemonUrl || DEFAULT_LOCAL_URL).replace(/\/+$/, '');
         this.agentDid = config.agentDid || `did:key:z6Mkq${Math.random().toString(36).substring(2, 10)}`;
         this.agentName = config.agentName || 'ACR Autonomous Agent';
-        this.apiKey = config.apiKey;
-        this.timeoutMs = config.timeoutMs || 10000;
+        this.apiKey = config.apiKey ?? config.token;
+        this.timeoutMs = config.timeoutMs || REST_TIMEOUT_MS;
+        this.strict = Boolean(config.strict);
     }
     async request(path, options = {}) {
         const url = `${this.baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
@@ -59,8 +105,11 @@ export class AcrClient {
         if (options.body && typeof options.body === 'string') {
             headers.set('Content-Type', 'application/json');
         }
-        if (this.apiKey) {
-            headers.set('Authorization', `Bearer ${this.apiKey}`);
+        if (!headers.has('Authorization')) {
+            const token = await loadDaemonApiToken(this.apiKey);
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
         }
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -68,9 +117,11 @@ export class AcrClient {
             const res = await fetch(url, {
                 ...options,
                 headers,
+                redirect: 'manual',
                 signal: controller.signal
             });
             clearTimeout(timer);
+            assertNoRedirectResponse(res);
             if (!res.ok) {
                 const errorText = await res.text();
                 throw new Error(`ACR API Error (${res.status}): ${errorText || res.statusText}`);
@@ -96,7 +147,9 @@ export class AcrClient {
                 latencyMs: Date.now() - start
             };
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return {
                 status: 'mock_online',
                 version: '1.0.0',
@@ -109,7 +162,9 @@ export class AcrClient {
         try {
             return await this.request('/api/v1/rooms');
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return [
                 {
                     id: 'consensus-main',
@@ -150,7 +205,9 @@ export class AcrClient {
                 body: JSON.stringify(msg)
             });
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             // Local fallback
         }
         const handle = this.activeRoomHandles.get(params.roomId);
@@ -163,7 +220,9 @@ export class AcrClient {
         try {
             return await this.request(`/api/v1/rooms/${roomId}/messages?limit=${limit}`);
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return [];
         }
     }
@@ -179,7 +238,9 @@ export class AcrClient {
             });
             return true;
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return true; // Accepted in sovereign mode
         }
     }
@@ -187,7 +248,9 @@ export class AcrClient {
         try {
             return await this.request(`/api/v1/audit?limit=${limit}`);
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return [
                 {
                     index: 0,
@@ -205,7 +268,9 @@ export class AcrClient {
         try {
             return await this.request('/api/v1/opsroom/status');
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return {
                 status: 'nominal',
                 incident: {
@@ -241,7 +306,9 @@ export class AcrClient {
                 body: JSON.stringify(payload)
             });
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return {
                 status: 'triggered',
                 incident_id: `INC-${Math.floor(10000 + Math.random() * 90000)}`,
@@ -256,7 +323,9 @@ export class AcrClient {
                 body: JSON.stringify({ plan_id: planId })
             });
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return {
                 status: 'executed',
                 plan_id: planId,
@@ -271,7 +340,9 @@ export class AcrClient {
         try {
             return await this.request('/api/v1/opsroom/battlecard');
         }
-        catch {
+        catch (err) {
+            if (this.strict)
+                throw err;
             return [
                 {
                     vector: 'Reasoning Engine',

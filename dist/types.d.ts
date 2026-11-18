@@ -3,7 +3,9 @@ export interface AcrClientConfig {
     agentDid?: string;
     agentName?: string;
     apiKey?: string;
+    token?: string;
     timeoutMs?: number;
+    strict?: boolean;
 }
 export interface Room {
     id: string;

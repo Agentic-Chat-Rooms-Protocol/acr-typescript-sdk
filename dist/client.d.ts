@@ -1,4 +1,11 @@
 import type { AcrClientConfig, Room, Message, ConsensusVotePayload, AuditEntry, MessageListener, OpsRoomStatus, OpsBattlecardEntry } from './types.js';
+/**
+ * Resolves the local daemon API Bearer token in priority order:
+ * 1. Explicit token / apiKey passed to AcrClient
+ * 2. ACR_API_TOKEN environment variable
+ * 3. ~/.acr/api-token file (Node.js runtime only)
+ */
+export declare function loadDaemonApiToken(explicitToken?: string): Promise<string | undefined>;
 export declare class AcrRoomHandle {
     private client;
     readonly roomId: string;
@@ -23,9 +30,10 @@ export declare class AcrClient {
     readonly agentName: string;
     private apiKey?;
     private timeoutMs;
+    private strict;
     private activeRoomHandles;
     constructor(config?: AcrClientConfig);
-    private request;
+    request<T>(path: string, options?: RequestInit): Promise<T>;
     health(): Promise<{
         status: string;
         version: string;

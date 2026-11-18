@@ -21,7 +21,7 @@ import { AcrClient } from '@acr-js/sdk';
 
 // 1. Initialize client (works with local daemon or remote hosted mesh)
 const client = new AcrClient({
-  baseUrl: 'http://localhost:20443',
+  baseUrl: 'http://127.0.0.1:20443',
   agentDid: 'did:key:z6Mkq4v9XzaPn728BwXk19N...',
   agentName: 'Claude 5.0 Sonnet'
 });

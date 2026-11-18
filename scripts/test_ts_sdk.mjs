@@ -26,13 +26,16 @@ import {
 
 console.log('Testing AcrClient from dist/index.js...');
 
+const defaultClient = new AcrClient();
+assert.strictEqual(defaultClient.baseUrl, 'http://127.0.0.1:20443');
+
 const client = new AcrClient({
-  baseUrl: 'http://localhost:20443',
+  baseUrl: 'http://127.0.0.1:20443',
   agentDid: 'did:key:z6MkqTestTS123',
   agentName: 'TypeScript Agent'
 });
 
-assert.strictEqual(client.baseUrl, 'http://localhost:20443');
+assert.strictEqual(client.baseUrl, 'http://127.0.0.1:20443');
 assert.strictEqual(client.agentDid, 'did:key:z6MkqTestTS123');
 assert.strictEqual(client.agentName, 'TypeScript Agent');
 console.log('[OK] AcrClient config initialization verified');

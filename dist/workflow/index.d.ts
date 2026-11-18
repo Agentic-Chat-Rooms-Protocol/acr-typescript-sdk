@@ -105,4 +105,7 @@ export interface SdkCheckpointManifest {
 }
 export declare function extractSdkCheckpointManifest(events: readonly SdkEventLike[], invocationId?: string): SdkCheckpointManifest;
 export declare function getActiveSdkEvents<T extends SdkEventLike>(events: readonly T[], consumerScope?: string): T[];
+export declare const CANONICAL_WORKFLOW_IDS: readonly ["postgres-split-brain", "egress-token-anomaly", "ingress-oom-autoscaling", "canary-deployment-rollback", "code-review-tla-verification", "saif-compliance-audit", "bft-consensus-deliberation", "twinseal-passkey-approval", "durable-wal-recovery", "context-compaction-pruning", "byzantine-fault-slashing", "identity-key-rotation", "micro-sandbox-isolation", "cross-model-agentflex-synthesis", "declarative-step-playbook", "postguard-injection-defense", "dynamic-dag-topology", "transitive-trust-federation"];
+export type CanonicalWorkflowId = (typeof CANONICAL_WORKFLOW_IDS)[number];
+export declare function isCanonicalWorkflowId(id: string): id is CanonicalWorkflowId;
 //# sourceMappingURL=index.d.ts.map

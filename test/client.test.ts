@@ -1,15 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { AcrClient } from '../src/client.js';
+import { AcrClient } from '../dist/index.js';
 
-test('AcrClient initializes with custom config', () => {
+test('AcrClient initializes with default loopback 127.0.0.1:20443 and custom config', () => {
+  const defaultClient = new AcrClient();
+  assert.strictEqual(defaultClient.baseUrl, 'http://127.0.0.1:20443');
+
   const client = new AcrClient({
-    baseUrl: 'http://localhost:20443',
+    baseUrl: 'http://127.0.0.1:20443',
     agentDid: 'did:key:z6MkqTest123',
     agentName: 'TestAgent'
   });
 
-  assert.strictEqual(client.baseUrl, 'http://localhost:20443');
+  assert.strictEqual(client.baseUrl, 'http://127.0.0.1:20443');
   assert.strictEqual(client.agentDid, 'did:key:z6MkqTest123');
   assert.strictEqual(client.agentName, 'TestAgent');
 });

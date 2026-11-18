@@ -6,4 +6,4 @@ Published to npm under `@acr-js/sdk`.
 ## Guidelines
 1. Zero runtime dependencies: Rely exclusively on standard `fetch`, `AbortController`, and modern ES2022 primitives.
 2. Complete typings: Always export comprehensive TypeScript interfaces for rooms, messages, consensus proposals, and audits.
-3. Sovereign & Cloud Hybrid: Support both local daemon loopback (`http://localhost:20443`) and remote cloud fallback meshes seamlessly.
+3. Sovereign & Cloud Hybrid: Support both local daemon loopback (`http://127.0.0.1:20443` with `ACR_API_TOKEN` / `~/.acr/api-token` Bearer auth) and remote cloud meshes (`https://mcp.agentchatrooms.dev/mcp` via `mcpendpoint`) seamlessly.
